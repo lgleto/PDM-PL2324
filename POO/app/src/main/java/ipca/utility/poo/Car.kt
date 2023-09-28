@@ -1,6 +1,6 @@
 package ipca.utility.poo
 
-class Car : Vehicle{
+class Car : Vehicle, Wheels {
 
     var wheels : Int
     var cabinTemprature = 15
@@ -24,4 +24,17 @@ class Car : Vehicle{
         super.showState()
         println("This is a car")
     }
+
+    override fun checkHowManyWheelsAreRunning() {
+        println("This vehicle has $wheels wheels.")
+    }
+
+    companion object{
+        val FUEL_PRICE = 1.42
+        fun pricePerKm (km: Double, literPer100Km : Double)  {
+            var result = (km * FUEL_PRICE * literPer100Km ) / 100.0
+            println("Your cost is $result ")
+        }
+    }
+
 }

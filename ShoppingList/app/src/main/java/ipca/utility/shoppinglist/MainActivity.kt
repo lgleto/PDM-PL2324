@@ -1,10 +1,12 @@
 package ipca.utility.shoppinglist
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ListView
 import android.widget.TextView
@@ -12,9 +14,9 @@ import android.widget.TextView
 class MainActivity : AppCompatActivity() {
 
     val products = arrayListOf<Product>(
-        Product("Maças", 3, false),
-        Product("Arroz",4, true),
-        Product("Pipocas",2, false)
+        Product("Maças", 3 ),
+        Product("Arroz", 4 ),
+        Product("Pipocas",2 )
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,6 +25,12 @@ class MainActivity : AppCompatActivity() {
 
         val listViewProducts = findViewById<ListView>(R.id.listViewProducts)
         listViewProducts.adapter = ProductAdapter()
+
+        val buttonAdd = findViewById<Button>(R.id.buttonAddProduct)
+        buttonAdd.setOnClickListener {
+            val intent = Intent(this,ProductDetailActivity::class.java )
+            startActivity(intent)
+        }
 
     }
 

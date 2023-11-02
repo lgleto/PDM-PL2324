@@ -1,5 +1,6 @@
 package ipca.utility.dailynews
 
+import android.icu.text.SimpleDateFormat
 import org.json.JSONObject
 import java.util.Date
 
@@ -9,7 +10,7 @@ data class Article (
     val description  : String?,
     val url          : String,
     val urlToImage   : String?,
-    val publishedAt  : Date
+    val publishedAt  : Date?
     ){
 
 
@@ -21,7 +22,7 @@ data class Article (
                 jsonObject["description"] as? String?,
                 jsonObject["url"        ] as String,
                 jsonObject["urlToImage" ] as? String?,
-                Date(),
+                (jsonObject["publishedAt" ] as? String?)?.toDate(),
             )
         }
     }

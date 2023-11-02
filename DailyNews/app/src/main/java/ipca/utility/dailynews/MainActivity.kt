@@ -6,25 +6,14 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.Date
+import androidx.lifecycle.lifecycleScope
 
 class MainActivity : AppCompatActivity() {
 
-    var articles = arrayListOf<Article>(
-        Article("aaaaaaaa", "sdkjhsdkfksdjhf","","", Date()),
-        Article("bbbbbbbb", "sdfsdfsdfsdfsdf","","", Date()),
-    )
+    var articles = arrayListOf<Article>( )
 
     val articlesAdapter = ArticlesAdapter()
 
@@ -35,34 +24,11 @@ class MainActivity : AppCompatActivity() {
         val listViewArticles = findViewById<ListView>(R.id.listViewArticles)
         listViewArticles.adapter = articlesAdapter
 
-        GlobalScope.launch(Dispatchers.IO) {
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .url("https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=1765f87e4ebc40229e80fd0f75b6416c")
-                .build()
 
-            client.newCall(request).execute().use { response ->
-                val result = response.body!!.string()
-
-                val jsonResult = JSONObject(result)
-                val status = jsonResult["status"] as String
-                if (status == "ok"){
-                    val jsonArray = jsonResult["articles"] as JSONArray
-                    val articles = arrayListOf<Article>()
-                    for (index in 0..jsonArray.length()-1){
-                        val jsonArticle = jsonArray.getJSONObject(index)
-
-                        val article = Article.fromJson(jsonArticle)
-                        articles.add(article)
-
-                    }
-                    this@MainActivity.articles = articles
-                    GlobalScope.launch(Dispatchers.Main) {
-                        articlesAdapter.notifyDataSetChanged()
-                    }
-                }
-            }
-        }
+      Backend.fetchArticles(lifecycleScope, "health") {
+          this@MainActivity.articles = it
+          articlesAdapter.notifyDataSetChanged()
+      }
 
     }
 
@@ -89,10 +55,20 @@ class MainActivity : AppCompatActivity() {
 
             textViewTitle.text = articles[position].title
             textViewDescription.text = articles[position].description
-            textViewDate.text = articles[position].publishedAt.toString()
+            textViewDate.text = articles[position].publishedAt?.toDDMMMHHMMDate()
+
+            val urlToImage = articles[position].urlToImage
+
+            urlToImage?.let { url->
+                Backend.fetchImage(lifecycleScope, url) { bitmap ->
+                    imageViewArticle.setImageBitmap(bitmap)
+                }
+            }
 
             rootView.setOnClickListener {
-
+                val intent = Intent(this@MainActivity,ArticleDetailActivity::class.java )
+                intent.putExtra(ArticleDetailActivity.EXTRA_URL, articles[position].url)
+                startActivity(intent)
             }
 
             return rootView

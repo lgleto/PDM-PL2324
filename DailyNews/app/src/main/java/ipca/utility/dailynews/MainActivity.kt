@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
           this@MainActivity.articles = it
           articlesAdapter.notifyDataSetChanged()
       }
-
+        
     }
 
     inner class ArticlesAdapter : BaseAdapter() {

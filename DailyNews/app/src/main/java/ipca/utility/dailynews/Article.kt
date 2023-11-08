@@ -4,7 +4,6 @@ import android.icu.text.SimpleDateFormat
 import org.json.JSONObject
 import java.util.Date
 
-
 data class Article (
     val title        : String?,
     val description  : String?,

@@ -1,5 +1,6 @@
 package ipca.budget.budget
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Entity
@@ -15,13 +16,13 @@ data class BudgetItem (
     val id : String,
     val description : String,
     val value : Double,
-    //val date : Date
+    val date : Date
 )
 
 @Dao
 interface BudgetItemDao {
     @Query("SELECT * FROM budgetitem")
-    fun getAll(): List<BudgetItem>
+    fun getAll(): LiveData<List<BudgetItem>>
 
     @Query("SELECT * FROM budgetitem WHERE id = :id")
     fun loadById(id: String): BudgetItem

@@ -15,6 +15,9 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,29 +32,6 @@ class MainActivity : AppCompatActivity() {
     val adapter = BudgetAdapter()
 
 
-    val resultLauncher =
-        registerForActivityResult(
-            ActivityResultContracts
-            .StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK){
-                it.data?.let {intent ->
-                    val name = intent.extras?.getString(BudgetItemDetialActivity.DATA_NAME)?:""
-                    val value = intent.extras?.getDouble(BudgetItemDetialActivity.DATA_VALUE)?:0.0
-                    val date = Date()
-                    val budgetItem = BudgetItem( UUID.randomUUID().toString(),
-                        name!!, value!!)
-                    lifecycleScope.launch(Dispatchers.IO) {
-
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            adapter.notifyDataSetChanged()
-                        }
-                    }
-
-
-
-                }
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,24 +39,19 @@ class MainActivity : AppCompatActivity() {
         listViewBudgetItem = findViewById<ListView>(R.id.listViewBudgetItems)
         listViewBudgetItem.adapter = adapter
 
+
         findViewById<Button>(R.id.buttonAdd).setOnClickListener {
             val intent = Intent(this,BudgetItemDetialActivity::class.java )
-            resultLauncher.launch(intent)
+            startActivity(intent)
         }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-
-            budgetItems = AppDatabase
-                .getDatabase(this@MainActivity)
-                ?.budgetItemDao()
-                ?.getAll()?: arrayListOf()
-
-            lifecycleScope.launch(Dispatchers.Main) {
+        AppDatabase
+            .getDatabase(this@MainActivity)
+            ?.budgetItemDao()
+            ?.getAll()?.observe(this@MainActivity, Observer {
+                budgetItems = it
                 adapter.notifyDataSetChanged()
-            }
-        }
-
-
+            })
 
         findViewById<Button>(R.id.buttonTotal).setOnClickListener {
 
@@ -101,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_add -> {
                 val intent = Intent(this,BudgetItemDetialActivity::class.java )
-                resultLauncher.launch(intent)
+                startActivity(intent)
                 true
             }
             R.id.action_sort -> {
@@ -143,7 +118,7 @@ class MainActivity : AppCompatActivity() {
 
             textViewDescription.text = budgetItems[position].description
             textViewValue.text = budgetItems[position].value.toString()
-            //textViewDate.text = budgetItems[position].date.toString()
+            textViewDate.text = budgetItems[position].date.toString()
 
 
             rootView.setOnClickListener {

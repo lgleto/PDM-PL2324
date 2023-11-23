@@ -9,6 +9,7 @@ import android.widget.EditText
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.UUID
 
 class BudgetItemDetialActivity : AppCompatActivity() {
@@ -36,6 +37,18 @@ class BudgetItemDetialActivity : AppCompatActivity() {
                 }
             }
         }
+        findViewById<Button>(R.id.buttonDelete).setOnClickListener {
+            if (budgetItem != null) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    AppDatabase
+                        .getDatabase(this@BudgetItemDetialActivity)
+                        ?.budgetItemDao()?.delete(budgetItem!!)
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        finish()
+                    }
+                }
+            }
+        }
 
         findViewById<Button>(R.id.buttonDone).setOnClickListener {
             if (budgetItem == null) {
@@ -47,12 +60,14 @@ class BudgetItemDetialActivity : AppCompatActivity() {
                             BudgetItem(
                                 UUID.randomUUID().toString(),
                                 editTextName.text.toString(),
-                                editTextValue.text.toString().toDouble()
+                                editTextValue.text.toString().toDouble(),
+                                Date()
                             )
                         )
                     lifecycleScope.launch(Dispatchers.Main) {
                         finish()
                     }
+
                 }
             }else{
                 lifecycleScope.launch(Dispatchers.IO) {
@@ -63,7 +78,8 @@ class BudgetItemDetialActivity : AppCompatActivity() {
                             BudgetItem(
                                 budgetItem!!.id,
                                 editTextName.text.toString(),
-                                editTextValue.text.toString().toDouble()
+                                editTextValue.text.toString().toDouble(),
+                                Date()
                             )
                         )
                     lifecycleScope.launch(Dispatchers.Main) {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "860801914390",
+    "project_id": "shoppinglistlesi",
+    "storage_bucket": "shoppinglistlesi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:860801914390:android:c0847b9e03260804184737",
+        "android_client_info": {
+          "package_name": "ipca.utility.shoppinglist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUK0iGwciigy_jZBhFBI5ctkY1XtqqMls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

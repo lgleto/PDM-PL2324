@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import ipca.utility.shoppinglist.Preferences
 import ipca.utility.shoppinglist.R
 
 class LoginActivity : AppCompatActivity() {
@@ -23,6 +24,8 @@ class LoginActivity : AppCompatActivity() {
         val editTextEmail = findViewById<EditText>(R.id.editTextEmail)
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
 
+        editTextEmail.setText(Preferences(this).readEmail())
+
         findViewById<Button>(R.id.buttonLogin).setOnClickListener {
 
             val email = editTextEmail.text.toString()
@@ -35,6 +38,7 @@ class LoginActivity : AppCompatActivity() {
                         Log.d(TAG, "signInWithEmail:success")
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
+                        Preferences(this).saveEmail(email)
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.exception)

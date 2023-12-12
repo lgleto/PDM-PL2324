@@ -1,72 +1,53 @@
-package ipca.utility.shoppinglist
+package ipca.utility.shoppinglist.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import ipca.utility.shoppinglist.databinding.ActivityProductDetailBinding
+import ipca.utility.shoppinglist.databinding.ActivityListDetailBinding
+import ipca.utility.shoppinglist.models.ShoppingList
 
-class ProductDetailActivity : AppCompatActivity() {
+class ShoppingListEditActivity : AppCompatActivity() {
 
-    private lateinit var binding : ActivityProductDetailBinding
+    private lateinit var binding : ActivityListDetailBinding
     var docId : String? = null
-    var qtd : Int
-        get() {
-            return binding.textViewQtt.text.toString().toInt()
-        }
-        set(value) {
-            if (value >= 0)
-                binding.textViewQtt.text = value.toString()
-        }
 
     val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityProductDetailBinding.inflate(layoutInflater)
+        binding = ActivityListDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         intent.extras?.let {
             docId = it.getString(DATA_ID)
-            db.collection("products")
+            db.collection("shoppingList")
                 .document(docId!!)
                 .get()
                 .addOnSuccessListener {
-                    val product = it.data?.let { it1 ->
-                        Product.fromSnapshot(
+                    val list = it.data?.let { it1 ->
+                        ShoppingList.fromSnapshot(
                             it.id,
                             it1
                         )
 
                     }
-                    binding.editTextProductName.setText(product?.name)
-                    qtd = (product?.qtt?:0).toInt()
+                    binding.editTextListName.setText(list?.name)
                 }
 
         }
 
 
-        binding.buttonIncrement.setOnClickListener {
-            qtd += 1
-        }
-        binding.buttonDecrement.setOnClickListener {
-            qtd -= 1
-        }
-
         binding.buttonDone.setOnClickListener {
             if (docId == null) {
-                val product = Product(
+                val list = ShoppingList(
                     null,
-                    binding.editTextProductName.text.toString(),
-                    qtd.toLong(),
-                    false
+                    binding.editTextListName.text.toString(),
                 )
-                db.collection("products")
-                    .add(product.toMap())
+                db.collection("shoppingList")
+                    .add(list.toMap())
                     .addOnSuccessListener { documentReference ->
                         Log.d(TAG, "DocumentSnapshot written with ID: ${documentReference.id}")
                         finish()
@@ -80,15 +61,13 @@ class ProductDetailActivity : AppCompatActivity() {
                             .show()
                     }
             }else{
-                val product = Product(
-                    docId,
-                    binding.editTextProductName.text.toString(),
-                    qtd.toLong(),
-                    false
+                val list = ShoppingList(
+                    null,
+                    binding.editTextListName.text.toString(),
                 )
-                db.collection("products")
+                db.collection("shoppingList")
                     .document(docId!!)
-                    .set(product.toMap())
+                    .set(list.toMap())
                     .addOnSuccessListener { documentReference ->
 
                         finish()

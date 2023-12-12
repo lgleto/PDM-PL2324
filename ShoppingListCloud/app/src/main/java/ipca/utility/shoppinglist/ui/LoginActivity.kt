@@ -1,4 +1,4 @@
-package ipca.utility.shoppinglist
+package ipca.utility.shoppinglist.ui
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import ipca.utility.shoppinglist.R
 
 class LoginActivity : AppCompatActivity() {
 

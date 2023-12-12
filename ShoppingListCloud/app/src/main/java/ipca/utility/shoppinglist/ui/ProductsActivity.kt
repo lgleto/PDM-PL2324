@@ -1,9 +1,6 @@
-package ipca.utility.shoppinglist
+package ipca.utility.shoppinglist.ui
 
-import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -14,65 +11,68 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ListView
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import android.Manifest
 import android.widget.Toast
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.messaging.FirebaseMessaging
+import ipca.utility.shoppinglist.R
+import ipca.utility.shoppinglist.models.Product
 
-val TAG = "shoppinglist"
 
-class MainActivity : AppCompatActivity() {
+class ProductsActivity : AppCompatActivity() {
 
     val db = Firebase.firestore
-
     val products = arrayListOf<Product>()
-
     val productAdapter = ProductAdapter()
-
+    var listId : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_products)
 
         val listViewProducts = findViewById<ListView>(R.id.listViewProducts)
         listViewProducts.adapter = productAdapter
 
         val buttonAdd = findViewById<Button>(R.id.buttonAddProduct)
         buttonAdd.setOnClickListener {
-            val intent = Intent(this,ProductDetailActivity::class.java )
+            val intent = Intent(this, ProductDetailActivity::class.java )
+            intent.putExtra(ProductDetailActivity.DATA_LIST_ID, listId)
             startActivity(intent)
+        }
+
+        intent.extras?.let {
+            listId = it.getString(ShoppingListEditActivity.DATA_ID)
+            db.collection("shoppingList")
+                .document(listId!!)
+                .collection("products")
+                .addSnapshotListener { snapshots, e ->
+                    if (e != null) {
+                        Log.w(TAG, "listen:error", e)
+                        return@addSnapshotListener
+                    }
+                    products.clear()
+
+                    for (snapshot in snapshots?.documents!!) {
+
+                        snapshot.data?.let {
+                            val product = Product.fromSnapshot(
+                                snapshot.id,
+                                it
+                            )
+                            products.add(product)
+                        }
+
+
+                    }
+                    productAdapter.notifyDataSetChanged()
+                }
+
         }
 
 
 
-        db.collection("products")
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Log.w(TAG, "listen:error", e)
-                    return@addSnapshotListener
-                }
-                products.clear()
-
-                for (snapshot in snapshots?.documents!!) {
-
-                    snapshot.data?.let {
-                        val product = Product.fromSnapshot(
-                            snapshot.id,
-                            it
-                        )
-                        products.add(product)
-                    }
-
-
-                }
-                productAdapter.notifyDataSetChanged()
-            }
-        askNotificationPermission()
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -133,14 +133,17 @@ class MainActivity : AppCompatActivity() {
 
             checkBox.setOnClickListener {
                 products[position].isChecked = checkBox.isChecked
-                db.collection("products")
+                db.collection("shoppingList")
+                    .document(listId!!)
+                    .collection("products")
                     .document(products[position].id!!)
                     .set(products[position].toMap())
             }
 
             rootView.setOnClickListener {
-                val intent = Intent(this@MainActivity,ProductDetailActivity::class.java )
+                val intent = Intent(this@ProductsActivity, ProductDetailActivity::class.java )
                 intent.putExtra(ProductDetailActivity.DATA_ID, products[position].id)
+                intent.putExtra(ProductDetailActivity.DATA_LIST_ID, listId)
                 startActivity(intent)
             }
 
@@ -149,33 +152,5 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    // Declare the launcher at the top of your Activity/Fragment:
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // FCM SDK (and your app) can post notifications.
-        } else {
-            // TODO: Inform user that that your app will not show notifications.
-        }
-    }
 
-    private fun askNotificationPermission() {
-        // This is only necessary for API level >= 33 (TIRAMISU)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                // FCM SDK (and your app) can post notifications.
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                // TODO: display an educational UI explaining to the user the features that will be enabled
-                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-                //       If the user selects "No thanks," allow the user to continue without notifications.
-            } else {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-    }
 }

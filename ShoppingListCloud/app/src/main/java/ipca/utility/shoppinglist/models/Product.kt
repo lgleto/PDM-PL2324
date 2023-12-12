@@ -1,4 +1,4 @@
-package ipca.utility.shoppinglist
+package ipca.utility.shoppinglist.models
 
 data class Product (
     var id : String?,
@@ -16,7 +16,7 @@ data class Product (
     }
 
     companion object{
-        fun fromSnapshot(docId :String, snap : Map<String,Any?>) : Product{
+        fun fromSnapshot(docId :String, snap : Map<String,Any?>) : Product {
             val name  = snap["name"] as String
             val qtt  = snap["qtt"] as Long
             val isChecked  = snap["isChecked"] as Boolean

@@ -29,8 +29,17 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/default_notification_channel_id" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.LoginActivity"
             android:exported="true" >
+
+        </activity>
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,12 +47,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.ShoppingListEditActivity"
             android:exported="true">
-
         </activity>
         <activity
-            android:name=".ProductDetailActivity"
+            android:name=".ui.ProductsActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".ui.ProductDetailActivity"
             android:exported="false" />
         <service
             android:name=".MyFirebaseMessagingService"

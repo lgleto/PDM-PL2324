@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import ipca.utility.shoppinglist.ui.MainActivity
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 

@@ -6,12 +6,23 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 
 class JogoGaloView : View {
 
     var points = arrayListOf<Point>()
+    var crosses = arrayListOf<Point>()
+
+    var isPoints = true
+
+
+    private var onTurnChanged : ((Boolean)->Unit)? = null
+
+    fun setOnTurnChanged (callback: (Boolean)->Unit) {
+        onTurnChanged = callback
+    }
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -52,6 +63,28 @@ class JogoGaloView : View {
                 w3/2.2f, paint)
         }
 
+        paint.color = Color.GREEN
+
+        for (p in crosses){
+            Log.d("customcontrol", "w3:${w3} h3:${h3} px:${p.x} py:${p.y}")
+            Log.d("customcontrol", "x:${w3*(p.x.toFloat() - w3)}  y:${h3*(p.y.toFloat() - h3)} ")
+            canvas.drawLine(
+                w3*p.x.toFloat() - w3,
+                h3*p.y.toFloat() - h3,
+                w3*p.x.toFloat(),
+                h3*p.y.toFloat(),
+                paint
+            )
+
+            canvas.drawLine(
+                w3*p.x.toFloat(),
+                h3*p.y.toFloat() - h3,
+                w3*p.x.toFloat() - w3,
+                h3*p.y.toFloat(),
+                paint
+            )
+        }
+
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -84,11 +117,22 @@ class JogoGaloView : View {
 
         when(event?.action){
             MotionEvent.ACTION_DOWN -> {
-                points.add(Point(qx,qy))
+                if (isPoints)
+                    points.add(Point(qx,qy))
+                else
+                    crosses.add(Point(qx,qy))
+                isPoints = !isPoints
+                onTurnChanged?.invoke(isPoints)
                 invalidate()
                 return true
             }
         }
         return false
+    }
+
+    fun clear(){
+        points.clear()
+        crosses.clear()
+        invalidate()
     }
 }

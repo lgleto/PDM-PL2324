@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         val buttonAdd = findViewById<Button>(R.id.buttonAddProduct)
         buttonAdd.setOnClickListener {
-            val intent = Intent(this, ShoppingListEditActivity::class.java )
+            val intent = Intent(this, ShoppingListEditActivity::class.java)
             startActivity(intent)
         }
 
@@ -112,7 +112,12 @@ class MainActivity : AppCompatActivity() {
             val auth = Firebase.auth
             db.collection("users")
                 .document(auth.currentUser!!.uid)
-                .set(hashMapOf("fcm_token" to token ) )
+                .set(
+                    hashMapOf(
+                        "fcm_token" to token,
+                        "isOnline" to true
+                    )
+                )
                 .addOnSuccessListener { documentReference ->
 
                 }
@@ -125,6 +130,29 @@ class MainActivity : AppCompatActivity() {
                         .show()
                 }
         })
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val auth = Firebase.auth
+        db.collection("users")
+            .document(auth.currentUser!!.uid)
+            .set(
+                hashMapOf(
+                    "isOnline" to false
+                )
+            )
+            .addOnSuccessListener { documentReference ->
+
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error adding document", e)
+                Toast.makeText(
+                    this,
+                    "Erro ao criar documento", Toast.LENGTH_LONG
+                )
+                    .show()
+            }
     }
 
 

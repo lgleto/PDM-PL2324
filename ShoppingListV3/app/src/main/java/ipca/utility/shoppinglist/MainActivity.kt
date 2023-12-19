@@ -12,14 +12,16 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
+import io.swagger.client.models.Product
 
 const val TAG = "shoppinglist"
 
 class MainActivity : AppCompatActivity() {
 
-    var products = arrayListOf<Product>( )
+    var products : List<Product>  = arrayListOf<Product>()
 
     val productAdapter = ProductAdapter()
 
@@ -28,13 +30,36 @@ class MainActivity : AppCompatActivity() {
         .StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK){
 
-            Backend.fetchProducts(lifecycleScope){
-                this.products = it
+            getProducts()
+        }
+    }
+
+    fun getProducts(){
+        Backend.fetchProducts().observe(this) {
+            it.onError {error ->
+                Toast.makeText(
+                    this@MainActivity,
+                    "Erro:${error.error}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            it.onNetworkError {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Erro${2}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            it.onSuccess {
+                for ( p in it) {
+                    Log.d(TAG, p.name?:"")
+                }
+                this.products = it.asList()
                 productAdapter.notifyDataSetChanged()
             }
         }
-
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -48,13 +73,7 @@ class MainActivity : AppCompatActivity() {
             resultLauncher.launch(intent)
         }
 
-        Backend.fetchProducts2(lifecycleScope){
-            //this.products = it
-            for ( p in it) {
-                Log.d(TAG, p.name?:"")
-            }
-            productAdapter.notifyDataSetChanged()
-        }
+        getProducts()
 
     }
 
@@ -82,7 +101,7 @@ class MainActivity : AppCompatActivity() {
 
             textViewProductName.text = products[position].name
             textViewProductQtt.text = products[position].qtt.toString()
-            checkBox.isChecked = products[position].isChecked
+            checkBox.isChecked = products[position].isChecked?:false
 
             rootView.setOnClickListener {
                 val intent = Intent(this@MainActivity,ProductDetailActivity::class.java )

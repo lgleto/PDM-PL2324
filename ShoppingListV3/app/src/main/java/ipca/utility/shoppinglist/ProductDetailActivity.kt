@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import io.swagger.client.models.Product
 import ipca.utility.shoppinglist.databinding.ActivityProductDetailBinding
 import java.util.UUID
 
@@ -45,16 +46,15 @@ class ProductDetailActivity : AppCompatActivity() {
         binding.buttonDone.setOnClickListener {
 
             Backend.addProduct(
-                lifecycleScope,
                 Product(UUID.randomUUID().toString(),
-                    binding.editTextProductName.text.toString(),
-                    qtd,
-                    false
-                    )
-            ) {
+                binding.editTextProductName.text.toString(),
+                qtd,
+                false
+            )).observe(this){
                 setResult(Activity.RESULT_OK)
                 finish()
             }
+
 
         }
 
